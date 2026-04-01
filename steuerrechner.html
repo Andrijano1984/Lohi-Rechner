@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Steuerrückerstattungsrechner 2026 – Mein Aktiver Lohi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bordeaux:       #981A37;
+      --bordeaux-dark:  #7A1530;
+      --bordeaux-hover: #871630;
+      --bordeaux-light: #F7EDEF;
+      --bg:             #F5F0EA;
+      --white:          #FFFFFF;
+      --text:           #1C1C1E;
+      --text-muted:     #6B6868;
+      --border:         #E0D8CF;
+      --green:          #1A6E3C;
+      --green-bg:       #EDF7F2;
+      --radius:         14px;
+      --shadow:         0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #FFFFFF;
+      padding: 18px 24px;
+      text-align: center;
+    }
+    .header-logo {
+      max-width: 200px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* ── Main ── */
+    main {
+      flex: 1;
+      max-width: 700px;
+      width: 100%;
+      margin: 32px auto;
+      padding: 0 16px 48px;
+    }
+
+    .intro {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .intro h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--bordeaux);
+      letter-spacing: -0.5px;
+      line-height: 1.25;
+    }
+    .intro p {
+      color: var(--text-muted);
+      margin-top: 8px;
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px 24px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--bordeaux);
+      margin-bottom: 20px;
+    }
+
+    /* ── Section Divider ── */
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 20px 0;
+    }
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    /* ── Form Grid ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: var(--white);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--bordeaux);
+      box-shadow: 0 0 0 3px rgba(139,26,47,0.1);
+    }
+
+    .input-wrap { position: relative; }
+    .input-prefix {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+    .input-prefix + input { padding-left: 28px; }
+    .input-suffix {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      pointer-events: none;
+    }
+    .input-suffix-pad { padding-right: 40px; }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6868' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+
+    /* ── Info boxes (Steuerklasse hints) ── */
+    .info-box {
+      display: none;
+      background: var(--bordeaux-light);
+      border: 1px solid rgba(139,26,47,0.2);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      color: var(--bordeaux-dark);
+      line-height: 1.5;
+      margin-top: 4px;
+    }
+    .info-box.visible { display: block; }
+
+    /* ── Conditional sections (Verheiratet, Behinderung) ── */
+    .conditional-section {
+      display: none;
+      margin-top: 14px;
+      padding: 16px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+    }
+    .conditional-section.visible { display: block; }
+    .conditional-section .form-grid { gap: 12px; }
+    .conditional-section .section-label { margin-bottom: 12px; }
+
+    /* ── Homeoffice Slider ── */
+    .slider-wrap { display: flex; gap: 12px; align-items: center; }
+    .slider-wrap input[type="range"] {
+      flex: 1;
+      padding: 0;
+      border: none;
+      border-radius: 0;
+      height: 4px;
+      accent-color: var(--bordeaux);
+      box-shadow: none;
+      cursor: pointer;
+    }
+    .slider-wrap input[type="range"]:focus { box-shadow: none; border-color: transparent; }
+    .slider-val {
+      min-width: 52px;
+      text-align: right;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* ── Checkbox rows ── */
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .checkbox-row:hover { border-color: var(--bordeaux); }
+    .checkbox-row.active { border-color: var(--bordeaux); background: var(--bordeaux-light); }
+    .checkbox-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--bordeaux);
+      cursor: pointer;
+      border: none;
+      padding: 0;
+      border-radius: 4px;
+      flex-shrink: 0;
+      appearance: auto;
+      -webkit-appearance: auto;
+    }
+    .checkbox-row input[type="checkbox"]:focus { box-shadow: none; }
+    .checkbox-row label {
+      font-size: 0.88rem;
+      color: var(--text);
+      cursor: pointer;
+      margin: 0;
+      font-weight: 500;
+    }
+
+    /* ── Pendler live preview ── */
+    .pendler-preview {
+      display: none;
+      margin-top: 6px;
+      font-size: 0.78rem;
+      color: var(--bordeaux);
+      font-weight: 600;
+    }
+    .pendler-preview.visible { display: block; }
+
+    /* ── Calculate Button ── */
+    .btn-calc {
+      width: 100%;
+      padding: 16px;
+      background: var(--bordeaux);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 8px;
+      letter-spacing: 0.2px;
+    }
+    .btn-calc:hover { background: var(--bordeaux-hover); }
+    .btn-calc:active { transform: scale(0.98); }
+
+    /* ── Result Card ── */
+    #result-card {
+      display: none;
+      animation: slideUp 0.4s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-amount {
+      text-align: center;
+      padding: 24px 0 20px;
+    }
+    .result-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 500;
+    }
+    .result-number {
+      font-size: 3.8rem;
+      font-weight: 800;
+      color: var(--green);
+      letter-spacing: -2px;
+      line-height: 1.1;
+      margin: 8px 0 4px;
+    }
+    .result-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Breakdown ── */
+    .breakdown { margin: 20px 0; }
+    .breakdown-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .breakdown-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.88rem;
+    }
+    .breakdown-item:last-child { border-bottom: none; }
+    .breakdown-item .item-label { color: var(--text); }
+    .breakdown-item .item-label small {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.76rem;
+      margin-top: 2px;
+    }
+    .breakdown-item .item-amount { font-weight: 600; color: var(--green); }
+    .breakdown-item .item-amount.neutral { color: var(--text-muted); }
+
+    /* ── Highlight box ── */
+    .highlight-box {
+      background: var(--green-bg);
+      border: 1px solid rgba(26,110,60,0.2);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin: 16px 0;
+      font-size: 0.86rem;
+      line-height: 1.6;
+      color: var(--green);
+    }
+    .highlight-box strong { font-weight: 600; }
+
+    /* ── Disclaimer ── */
+    .disclaimer {
+      background: #FAFAF9;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 16px 0;
+    }
+    .disclaimer::before { content: "ℹ️ "; }
+
+    /* ── CTA ── */
+    .cta-section { text-align: center; padding-top: 8px; }
+    .btn-cta {
+      display: inline-block;
+      width: 100%;
+      padding: 18px 24px;
+      background: var(--bordeaux);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 14px;
+      font-family: inherit;
+      font-size: 1.05rem;
+      font-weight: 700;
+      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(139,26,47,0.3);
+      letter-spacing: 0.2px;
+    }
+    .btn-cta:hover {
+      background: var(--bordeaux-hover);
+      box-shadow: 0 6px 22px rgba(139,26,47,0.4);
+      transform: translateY(-1px);
+    }
+    .btn-cta:active { transform: scale(0.98); }
+    .cta-sub {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--bordeaux-dark);
+      color: rgba(255,255,255,0.6);
+      text-align: center;
+      padding: 20px;
+      font-size: 0.78rem;
+    }
+
+    /* ── Tooltips ── */
+    .tooltip-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      margin-left: 5px;
+      vertical-align: middle;
+    }
+    .tooltip-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 15px;
+      height: 15px;
+      background: var(--bordeaux-light);
+      color: var(--bordeaux);
+      border: 1px solid rgba(152,26,55,0.25);
+      border-radius: 50%;
+      font-size: 0.62rem;
+      font-weight: 700;
+      cursor: help;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .tooltip-text {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1C1C1E;
+      color: #fff;
+      font-size: 0.74rem;
+      font-weight: 400;
+      line-height: 1.5;
+      padding: 8px 12px;
+      border-radius: 8px;
+      width: 230px;
+      z-index: 200;
+      pointer-events: none;
+      text-transform: none;
+      letter-spacing: 0;
+      white-space: normal;
+    }
+    .tooltip-text::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: #1C1C1E;
+    }
+    .tooltip-wrap:hover .tooltip-text { display: block; }
+
+    /* ── E-Mail CTA ── */
+    .email-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .email-section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    .btn-email {
+      display: block;
+      width: 100%;
+      padding: 14px 20px;
+      background: var(--bordeaux);
+      color: #fff;
+      text-align: center;
+      text-decoration: none;
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 10px;
+    }
+    .btn-email:hover { background: var(--bordeaux-hover); }
+    .btn-email:active { transform: scale(0.98); }
+    .email-hint {
+      margin-top: 8px;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* ── WhatsApp Button ── */
+    .btn-whatsapp {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px 20px;
+      background: #25D366;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 12px;
+    }
+    .btn-whatsapp:hover { background: #1ebe57; }
+    .btn-whatsapp:active { transform: scale(0.98); }
+    .btn-whatsapp svg { flex-shrink: 0; }
+
+    /* ── Lohnersatzleistungen ── */
+    .prog-info-box {
+      background: var(--bordeaux-light);
+      border: 1px solid rgba(152,26,55,0.2);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      color: var(--bordeaux-dark);
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+    .warning-box {
+      background: #FFF2F2;
+      border: 1.5px solid #D93025;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      color: #B00020;
+      line-height: 1.5;
+      margin-top: 12px;
+      display: none;
+    }
+    .warning-box.visible { display: block; }
+    .lel-entry {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .lel-entry select { flex: 1.5; min-width: 0; }
+    .lel-entry .input-wrap { flex: 1; min-width: 0; }
+    .btn-remove-lel {
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 10px 13px;
+      line-height: 1;
+      transition: border-color 0.2s, color 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-remove-lel:hover { border-color: #D93025; color: #D93025; }
+    .btn-add-lel {
+      background: none;
+      border: 1.5px dashed var(--bordeaux);
+      border-radius: 10px;
+      color: var(--bordeaux);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 10px 16px;
+      width: 100%;
+      transition: background 0.2s;
+      margin-top: 4px;
+    }
+    .btn-add-lel:hover { background: var(--bordeaux-light); }
+
+    /* ── Mobile ── */
+    @media (max-width: 520px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .form-group.full { grid-column: 1; }
+      .conditional-section .form-grid { grid-template-columns: 1fr; }
+      .intro h1 { font-size: 1.35rem; }
+      .result-number { font-size: 3rem; }
+      main { margin-top: 20px; }
+      .card { padding: 20px 16px; }
+      .lel-entry { flex-direction: column; }
+      .lel-entry select, .lel-entry .input-wrap { width: 100%; }
+      .btn-remove-lel { align-self: flex-end; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <img src="Logo2.png" alt="Mein Aktiver Lohi" class="header-logo">
+</header>
+
+<main>
+  <div class="intro">
+    <h1>Was bekommst Du vom<br>Finanzamt zurück?</h1>
+    <p>Berechne Deine geschätzte Steuerrückerstattung für 2026 – in unter 60 Sekunden.</p>
+  </div>
+
+  <!-- Calculator Card -->
+  <div class="card">
+    <div class="card-title">Deine Angaben</div>
+
+    <div class="form-grid">
+
+      <!-- Bruttogehalt -->
+      <div class="form-group">
+        <label for="monthlyGross">Bruttogehalt (monatlich)<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-text">Dein monatliches Gehalt vor Steuer und Sozialabgaben</span></span></label>
+        <div class="input-wrap">
+          <span class="input-prefix">€</span>
+          <input type="number" id="monthlyGross" min="500" max="20000" step="50"
+                 placeholder="z.B. 3.500" inputmode="numeric">
+        </div>
+      </div>
+
+      <!-- Steuerklasse -->
+      <div class="form-group">
+        <label for="taxClass">Steuerklasse<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-text">Klasse 1=ledig, 3=verheiratet Hauptverdiener, 4=verheiratet gleich, 5=verheiratet Zweitverdiener</span></span></label>
+        <select id="taxClass">
+          <option value="">Bitte wählen</option>
+          <option value="1">Klasse 1 – Ledig / Getrennt</option>
+          <option value="2">Klasse 2 – Alleinerziehend</option>
+          <option value="3">Klasse 3 – Verheiratet (höheres Einkommen)</option>
+          <option value="4">Klasse 4 – Verheiratet (gleiche Einkommen)</option>
+          <option value="5">Klasse 5 – Verheiratet (niedrigeres Einkommen)</option>
+          <option value="6">Klasse 6 – Zweitjob</option>
+        </select>
+        <div class="info-box" id="infoKlasse2">
+          <strong>Tipp für Alleinerziehende:</strong> Du hast Anspruch auf den Entlastungsbetrag von 4.260 € (+ 240 € pro weiteres Kind). Wir stellen sicher, dass Du diesen Vorteil vollständig nutzt.
+        </div>
+        <div class="info-box" id="infoKlasse5">
+          <strong>Klasse 5:</strong> In Kombination mit Klasse 3 können Ehepaare oft durch eine Steuererklärung eine Rückerstattung erzielen. Wir prüfen das für Euch gemeinsam.
+        </div>
+        <div class="info-box" id="infoKlasse6">
+          <strong>Klasse 6 – Zweitjob:</strong> Hier wird oft zu viel Lohnsteuer abgezogen. Eine Steuererklärung kann sich besonders lohnen.
+        </div>
+      </div>
+
+      <!-- Bundesland -->
+      <div class="form-group">
+        <label for="state">Bundesland</label>
+        <select id="state">
+          <option value="">Bitte wählen</option>
+          <option value="BW">Baden-Württemberg</option>
+          <option value="BY">Bayern</option>
+          <option value="BE">Berlin</option>
+          <option value="BB">Brandenburg</option>
+          <option value="HB">Bremen</option>
+          <option value="HH">Hamburg</option>
+          <option value="HE">Hessen</option>
+          <option value="MV">Mecklenburg-Vorpommern</option>
+          <option value="NI">Niedersachsen</option>
+          <option value="NW">Nordrhein-Westfalen</option>
+          <option value="RP">Rheinland-Pfalz</option>
+          <option value="SL">Saarland</option>
+          <option value="SN">Sachsen</option>
+          <option value="ST">Sachsen-Anhalt</option>
+          <option value="SH">Schleswig-Holstein</option>
+          <option value="TH">Thüringen</option>
+        </select>
+      </div>
+
+      <!-- Kinder -->
+      <div class="form-group">
+        <label for="children">Kinder (Anzahl)<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-text">Kinderfreibetrag 2026: 9.756 € pro Kind</span></span></label>
+        <select id="children">
+          <option value="0">Keine Kinder</option>
+          <option value="1">1 Kind</option>
+          <option value="2">2 Kinder</option>
+          <option value="3">3 Kinder</option>
+          <option value="4">4 Kinder</option>
+          <option value="5">5 oder mehr Kinder</option>
+        </select>
+      </div>
+
+    </div><!-- /form-grid -->
+
+    <!-- ── Verheiratet ── -->
+    <hr class="section-divider">
+    <div class="form-group full">
+      <label style="margin-bottom:6px;">Familienstand</label>
+      <div class="checkbox-row" id="verheiratet-row">
+        <input type="checkbox" id="verheiratet">
+        <label for="verheiratet">Verheiratet / eingetragene Lebenspartnerschaft</label>
+      </div>
+      <div class="conditional-section" id="partner-section">
+        <div class="section-label">Angaben Partner/in – für Ehegattensplitting</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="partnerGross">Bruttogehalt Partner/in (monatlich)</label>
+            <div class="input-wrap">
+              <span class="input-prefix">€</span>
+              <input type="number" id="partnerGross" min="0" max="20000" step="50"
+                     placeholder="z.B. 2.800" inputmode="numeric">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="partnerTaxClass">Steuerklasse Partner/in</label>
+            <select id="partnerTaxClass">
+              <option value="1">Klasse 1</option>
+              <option value="2">Klasse 2</option>
+              <option value="3">Klasse 3</option>
+              <option value="4" selected>Klasse 4</option>
+              <option value="5">Klasse 5</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Pendlerpauschale ── -->
+    <hr class="section-divider">
+    <div class="section-label">Fahrten zur Arbeit</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="commuteKm">Entfernung zur Arbeit (einfache Strecke)<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-text">0,30 € je Entfernungskilometer für die ersten 20 km, ab dem 21. km erhöht sich die Pauschale auf 0,38 € – gilt für einfache Strecke pro Arbeitstag</span></span></label>
+        <div class="input-wrap">
+          <input type="number" id="commuteKm" min="0" max="500" step="1"
+                 placeholder="z.B. 25" inputmode="numeric" class="input-suffix-pad">
+          <span class="input-suffix">km</span>
+        </div>
+        <div class="pendler-preview" id="pendler-preview"></div>
+      </div>
+      <div class="form-group">
+        <label for="workDays">Arbeitstage pro Jahr</label>
+        <div class="input-wrap">
+          <input type="number" id="workDays" min="1" max="365" step="1"
+                 placeholder="220" value="220" inputmode="numeric" class="input-suffix-pad">
+          <span class="input-suffix">Tage</span>
+        </div>
+        <small style="color:var(--text-muted);font-size:0.75rem;margin-top:4px;">
+          Standard: 220 Tage (Vollzeit)
+        </small>
+      </div>
+    </div>
+
+    <!-- ── Homeoffice ── -->
+    <hr class="section-divider">
+    <div class="form-group full">
+      <label for="homeOfficeDays">Homeoffice-Tage pro Jahr<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-text">6 € pro Tag, max. 210 Tage = 1.260 € absetzbar</span></span> <span id="hoLabel" style="color:var(--bordeaux);font-weight:600;"></span></label>
+      <div class="slider-wrap">
+        <input type="range" id="homeOfficeDays" min="0" max="210" step="5" value="0">
+        <span class="slider-val" id="hoVal">0 Tage</span>
+      </div>
+      <small style="color:var(--text-muted);font-size:0.75rem;margin-top:4px;">
+        Max. 210 Tage · 6 € / Tag · bis zu 1.260 € absetzbar (Homeoffice-Pauschale 2026)
+      </small>
+    </div>
+
+    <!-- ── Werbungskosten ── -->
+    <hr class="section-divider">
+    <div class="form-group full">
+      <label for="werbungskosten">Zusätzliche Werbungskosten (optional)</label>
+      <div class="input-wrap">
+        <span class="input-prefix">€</span>
+        <input type="number" id="werbungskosten" min="0" max="50000" step="50"
+               placeholder="z.B. Arbeitsmittel, Fortbildung, Berufskleidung …" inputmode="numeric">
+      </div>
+      <small style="color:var(--text-muted);font-size:0.75rem;margin-top:4px;line-height:1.5;">
+        <strong>Hinweis:</strong> Der Arbeitnehmer-Pauschbetrag von 1.230 € wird automatisch berücksichtigt.
+        Gib hier nur Kosten ein, die diesen Betrag übersteigen. Fahrtkosten werden über das Feld oben berechnet.
+      </small>
+    </div>
+
+    <!-- ── Behinderung ── -->
+    <hr class="section-divider">
+    <div class="form-group full">
+      <label style="margin-bottom:6px;">Behinderung<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-text">Pauschbetrag je nach GdB: z.B. GdB 50 = 1.140 €, GdB 100 = 7.400 €</span></span></label>
+      <div class="checkbox-row" id="behinderung-row">
+        <input type="checkbox" id="behinderung">
+        <label for="behinderung">Behinderung vorhanden (Schwerbehindertenausweis / GdB)</label>
+      </div>
+      <div class="conditional-section" id="behinderung-section">
+        <div class="section-label">Grad der Behinderung (GdB)</div>
+        <div class="form-group">
+          <label for="gdB">Grad der Behinderung</label>
+          <select id="gdB">
+            <option value="20">GdB 20 – Pauschbetrag: 384 €</option>
+            <option value="25">GdB 25 – Pauschbetrag: 384 €</option>
+            <option value="30">GdB 30 – Pauschbetrag: 620 €</option>
+            <option value="35">GdB 35 – Pauschbetrag: 620 €</option>
+            <option value="40">GdB 40 – Pauschbetrag: 860 €</option>
+            <option value="45">GdB 45 – Pauschbetrag: 860 €</option>
+            <option value="50" selected>GdB 50 – Pauschbetrag: 1.140 €</option>
+            <option value="55">GdB 55 – Pauschbetrag: 1.140 €</option>
+            <option value="60">GdB 60 – Pauschbetrag: 1.440 €</option>
+            <option value="65">GdB 65 – Pauschbetrag: 1.440 €</option>
+            <option value="70">GdB 70 – Pauschbetrag: 1.780 €</option>
+            <option value="75">GdB 75 – Pauschbetrag: 1.780 €</option>
+            <option value="80">GdB 80 – Pauschbetrag: 2.120 €</option>
+            <option value="85">GdB 85 – Pauschbetrag: 2.120 €</option>
+            <option value="90">GdB 90 – Pauschbetrag: 2.460 €</option>
+            <option value="95">GdB 95 – Pauschbetrag: 2.460 €</option>
+            <option value="100">GdB 100 – Pauschbetrag: 7.400 €</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Kirchensteuer ── -->
+    <hr class="section-divider">
+    <div class="form-group full">
+      <label style="margin-bottom:6px;">Kirchensteuer<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-text">8% in Bayern/BW, 9% in allen anderen Bundesländern</span></span></label>
+      <div class="checkbox-row" id="kirche-row">
+        <input type="checkbox" id="kirchensteuer">
+        <label for="kirchensteuer">Ich zahle Kirchensteuer</label>
+      </div>
+    </div>
+
+    <!-- ── Spenden ── -->
+    <hr class="section-divider">
+    <div class="form-group full">
+      <label for="spenden">Spenden an gemeinnützige Organisationen (€/Jahr)<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-text">Spenden sind bis zu 20% deines Einkommens steuerlich absetzbar</span></span></label>
+      <div class="input-wrap">
+        <span class="input-prefix">€</span>
+        <input type="number" id="spenden" min="0" max="50000" step="50"
+               placeholder="z.B. 500" inputmode="numeric">
+      </div>
+    </div>
+
+    <!-- ── Handwerkerleistungen ── -->
+    <hr class="section-divider">
+    <div class="form-group full">
+      <label for="handwerker">Handwerkerleistungen (€/Jahr, nur Lohnkosten)<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-text">20% der Lohnkosten bis max. 1.200 € Steuerersparnis direkt von der Steuerschuld</span></span></label>
+      <div class="input-wrap">
+        <span class="input-prefix">€</span>
+        <input type="number" id="handwerker" min="0" max="6000" step="50"
+               placeholder="z.B. 2.000" inputmode="numeric">
+      </div>
+      <small style="color:var(--text-muted);font-size:0.75rem;margin-top:4px;line-height:1.5;">
+        Steuerermäßigung: 20% der Lohnkosten, max. 1.200 € direkt von der Steuerschuld
+      </small>
+    </div>
+
+    <!-- ── Lohnersatzleistungen (Progressionsvorbehalt) ── -->
+    <hr class="section-divider">
+    <div class="form-group full">
+      <label style="margin-bottom:6px;">Lohnersatzleistungen (Progressionsvorbehalt)<span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-text">Diese Leistungen sind steuerfrei, erhöhen aber Deinen Steuersatz auf das übrige Einkommen (§ 32b EStG)</span></span></label>
+      <div class="checkbox-row" id="lel-row">
+        <input type="checkbox" id="lel-check">
+        <label for="lel-check">Ich hatte Lohnersatzleistungen (z.B. Elterngeld, Krankengeld…)</label>
+      </div>
+      <div class="conditional-section" id="lel-section">
+        <div class="prog-info-box">
+          Diese Leistungen sind steuerfrei, erhöhen aber Deinen Steuersatz auf das übrige Einkommen (§ 32b EStG – Progressionsvorbehalt).
+        </div>
+        <div id="lel-entries"></div>
+        <button type="button" class="btn-add-lel" onclick="addLelEntry()">+ Weitere Leistung hinzufügen</button>
+        <div class="warning-box" id="lel-warning">
+          ⚠️ <strong>Pflichtveranlagung:</strong> Du bist gesetzlich verpflichtet, eine Steuererklärung abzugeben (§ 46 Abs. 2 Nr. 1 EStG).
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-calc" onclick="calculate()">Jetzt berechnen →</button>
+  </div>
+
+  <!-- Result Card -->
+  <div class="card" id="result-card">
+    <div class="card-title">Dein Ergebnis</div>
+
+    <div class="result-amount">
+      <div class="result-label">Geschätzte Steuerrückerstattung</div>
+      <div class="result-number" id="result-number">0 €</div>
+      <div class="result-sub">für das Steuerjahr 2026</div>
+    </div>
+
+    <div class="breakdown" id="breakdown"></div>
+
+    <div class="highlight-box" id="highlight-box"></div>
+
+    <div class="disclaimer">
+      Dies ist eine Schätzung auf Basis Deiner Angaben. Dein tatsächliches Ergebnis kann – je nach individueller Situation – <strong>deutlich höher</strong> sein. Arztkosten, Spenden, Fortbildungen, Umzugskosten und weitere Abzüge sind hier noch nicht berücksichtigt.
+    </div>
+
+    <div class="cta-section">
+      <a href="https://www.mein-aktiver-lohi.de/angebot-anfordern" class="btn-cta" target="_blank" rel="noopener">
+        Jetzt Angebot anfordern
+      </a>
+      <div class="cta-sub">Wir holen das Maximum für Dich raus</div>
+    </div>
+
+    <!-- ── E-Mail Ergebnis ── -->
+    <div class="email-section">
+      <div class="email-section-title">Ergebnis per E-Mail erhalten</div>
+      <div class="form-group">
+        <label for="emailAddress">E-Mail-Adresse</label>
+        <input type="email" id="emailAddress" placeholder="deine@email.de">
+      </div>
+      <button class="btn-email" onclick="sendResultByEmail()">Ergebnis zusenden</button>
+      <div class="email-hint">Kein Spam. Nur dein Ergebnis + ein kostenloses Beratungsangebot.</div>
+
+      <!-- ── WhatsApp ── -->
+      <a href="https://wa.me/4989289335700" class="btn-whatsapp" target="_blank" rel="noopener">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+        Direkt per WhatsApp beraten lassen
+      </a>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  © 2026 Mein Aktiver Lohi · Lohnsteuerhilfeverein · München
+</footer>
+
+<script>
+  // ── Behinderten-Pauschbeträge ──
+  const GDB_PAUSCH = {
+    20: 384, 25: 384, 30: 620, 35: 620,
+    40: 860, 45: 860, 50: 1140, 55: 1140,
+    60: 1440, 65: 1440, 70: 1780, 75: 1780,
+    80: 2120, 85: 2120, 90: 2460, 95: 2460,
+    100: 7400
+  };
+
+  // ── Pendlerpauschale berechnen ──
+  function calcPendler(km, days) {
+    if (!km || km <= 0 || !days || days <= 0) return 0;
+    const rateA = Math.min(km, 20) * 0.30;
+    const rateB = Math.max(0, km - 20) * 0.38;
+    return Math.round((rateA + rateB) * days);
+  }
+
+  // ── Live Pendler Preview ──
+  function updatePendlerPreview() {
+    const km   = parseFloat(document.getElementById('commuteKm').value) || 0;
+    const days = parseFloat(document.getElementById('workDays').value)  || 220;
+    const prev = document.getElementById('pendler-preview');
+    if (km > 0) {
+      const amount = calcPendler(km, days);
+      prev.textContent = `= ${amount.toLocaleString('de-DE')} € Pendlerpauschale / Jahr`;
+      prev.classList.add('visible');
+    } else {
+      prev.classList.remove('visible');
+    }
+  }
+  document.getElementById('commuteKm').addEventListener('input', updatePendlerPreview);
+  document.getElementById('workDays').addEventListener('input', updatePendlerPreview);
+
+  // ── Homeoffice Slider ──
+  const slider = document.getElementById('homeOfficeDays');
+  const hoVal  = document.getElementById('hoVal');
+  slider.addEventListener('input', () => {
+    const days    = parseInt(slider.value);
+    const savings = Math.min(days * 6, 1260);
+    hoVal.textContent = `${days} Tage`;
+    document.getElementById('hoLabel').textContent =
+      days > 0 ? `(= ${savings.toLocaleString('de-DE')} € absetzbar)` : '';
+  });
+
+  // ── Steuerklassen Info ──
+  document.getElementById('taxClass').addEventListener('change', function () {
+    document.querySelectorAll('.info-box').forEach(b => b.classList.remove('visible'));
+    if (this.value === '2') document.getElementById('infoKlasse2').classList.add('visible');
+    if (this.value === '5') document.getElementById('infoKlasse5').classList.add('visible');
+    if (this.value === '6') document.getElementById('infoKlasse6').classList.add('visible');
+  });
+
+  // ── Verheiratet Toggle ──
+  document.getElementById('verheiratet').addEventListener('change', function () {
+    const sec = document.getElementById('partner-section');
+    const row = document.getElementById('verheiratet-row');
+    sec.classList.toggle('visible', this.checked);
+    row.classList.toggle('active', this.checked);
+  });
+
+  // ── Behinderung Toggle ──
+  document.getElementById('behinderung').addEventListener('change', function () {
+    const sec = document.getElementById('behinderung-section');
+    const row = document.getElementById('behinderung-row');
+    sec.classList.toggle('visible', this.checked);
+    row.classList.toggle('active', this.checked);
+  });
+
+  // ── Lohnersatzleistungen ──
+  const LEL_TYPES = [
+    'Arbeitslosengeld I', 'Kurzarbeitergeld', 'Krankengeld', 'Elterngeld',
+    'Mutterschaftsgeld', 'Übergangsgeld', 'Verletztengeld',
+    'Pflegeunterstützungsgeld', 'Insolvenzgeld', 'Sonstige'
+  ];
+
+  function addLelEntry() {
+    const container = document.getElementById('lel-entries');
+    const div = document.createElement('div');
+    div.className = 'lel-entry';
+    div.innerHTML = `
+      <select class="lel-type">
+        ${LEL_TYPES.map(t => `<option value="${t}">${t}</option>`).join('')}
+      </select>
+      <div class="input-wrap">
+        <span class="input-prefix">€</span>
+        <input type="number" class="lel-amount" min="0" max="100000" step="50"
+               placeholder="Jahresbetrag" inputmode="numeric">
+      </div>
+      <button type="button" class="btn-remove-lel" onclick="removeLelEntry(this)" title="Entfernen">×</button>
+    `;
+    div.querySelector('.lel-amount').addEventListener('input', updateLelWarning);
+    container.appendChild(div);
+    updateLelWarning();
+  }
+
+  function removeLelEntry(btn) {
+    btn.closest('.lel-entry').remove();
+    updateLelWarning();
+  }
+
+  function calcLelTotal() {
+    let total = 0;
+    document.querySelectorAll('.lel-amount').forEach(inp => {
+      total += parseFloat(inp.value) || 0;
+    });
+    return total;
+  }
+
+  function updateLelWarning() {
+    const total = calcLelTotal();
+    document.getElementById('lel-warning').classList.toggle('visible', total > 410);
+  }
+
+  document.getElementById('lel-check').addEventListener('change', function () {
+    const sec = document.getElementById('lel-section');
+    const row = document.getElementById('lel-row');
+    sec.classList.toggle('visible', this.checked);
+    row.classList.toggle('active', this.checked);
+    if (this.checked && document.getElementById('lel-entries').children.length === 0) {
+      addLelEntry();
+    }
+  });
+
+  // ── Tax Formula §32a EStG 2026 ──
+  function incomeTax(zvE) {
+    zvE = Math.max(0, Math.round(zvE));
+    const GFB = 12348;
+    if (zvE <= GFB) return 0;
+    if (zvE <= 17742) {
+      const y = (zvE - GFB) / 10000;
+      return Math.round((979.18 * y + 1400) * y);
+    }
+    if (zvE <= 68480) {
+      const z = (zvE - 17742) / 10000;
+      return Math.round((192.59 * z + 2397) * z + 966.53);
+    }
+    if (zvE <= 277825) return Math.round(0.42 * zvE - 10602.13);
+    return Math.round(0.45 * zvE - 18921.37);
+  }
+
+  function incomeTaxSplitting(zvE) {
+    return 2 * incomeTax(zvE / 2);
+  }
+
+  function solidaritaet(esSt) {
+    if (esSt <= 18130) return 0;
+    const milderung = (esSt - 18130) * 0.119;
+    const voll = esSt * 0.055;
+    return Math.round(Math.min(milderung, voll));
+  }
+
+  function marginalRate(zvE, splitting) {
+    const z = splitting ? zvE / 2 : zvE;
+    if (z <= 12348)  return 0;
+    if (z <= 17742)  return 0.14 + (z - 12348) / (17742 - 12348) * 0.10;
+    if (z <= 68480)  return 0.24 + (z - 17742) / (68480 - 17742) * 0.18;
+    if (z <= 277825) return 0.42;
+    return 0.45;
+  }
+
+  function calcSV(annual, kids) {
+    const BBG_RV = 97200, BBG_KV = 66600;
+    const bRV = Math.min(annual, BBG_RV);
+    const bKV = Math.min(annual, BBG_KV);
+    return bRV * 0.093 + bRV * 0.013 + bKV * 0.090
+         + bKV * (kids > 0 ? 0.017 : 0.020);
+  }
+
+  // ── Main Calculation ──
+  function calculate() {
+    const gross    = parseFloat(document.getElementById('monthlyGross').value);
+    const tc       = parseInt(document.getElementById('taxClass').value);
+    const state    = document.getElementById('state').value;
+    const kids     = parseInt(document.getElementById('children').value) || 0;
+    const hoDays   = parseInt(slider.value) || 0;
+    const extraWK  = parseFloat(document.getElementById('werbungskosten').value) || 0;
+    const kirche   = document.getElementById('kirchensteuer').checked;
+    const verheiratet = document.getElementById('verheiratet').checked;
+    const hatBehinderung = document.getElementById('behinderung').checked;
+    const commuteKm    = parseFloat(document.getElementById('commuteKm').value) || 0;
+    const workDays     = parseFloat(document.getElementById('workDays').value)  || 220;
+    const spenden      = parseFloat(document.getElementById('spenden').value)   || 0;
+    const handwerker   = parseFloat(document.getElementById('handwerker').value) || 0;
+    const hatLEL       = document.getElementById('lel-check').checked;
+    const lelTotal     = hatLEL ? calcLelTotal() : 0;
+
+    // Validation
+    if (!gross || gross < 500) { alert('Bitte gib ein gültiges Bruttogehalt ein (mind. 500 €).'); return; }
+    if (!tc) { alert('Bitte wähle Deine Steuerklasse.'); return; }
+
+    const annual     = gross * 12;
+    const pausch     = 1230;
+    const soPausch   = 36;
+    const kirchRate  = kirche ? ((state === 'BY' || state === 'BW') ? 0.08 : 0.09) : 0;
+
+    // Behinderten-Pauschbetrag
+    const gdB        = hatBehinderung ? parseInt(document.getElementById('gdB').value) : 0;
+    const behinderPausch = hatBehinderung ? (GDB_PAUSCH[gdB] || 0) : 0;
+
+    // Pendlerpauschale
+    const pendlerWK  = calcPendler(commuteKm, workDays);
+
+    // Homeoffice
+    const hoDeduction = Math.min(hoDays * 6, 1260);
+
+    // Spenden (Sonderausgaben, max 20% des Einkommens)
+    const spendenAbzug = Math.min(spenden, annual * 0.20);
+
+    // Handwerkerleistungen (20% Steuerermäßigung, max 1.200 €)
+    const handwerkerKredit = Math.min(handwerker * 0.20, 1200);
+
+    // Entlastungsbetrag Alleinerziehend
+    const entlastung = tc === 2 ? (4260 + Math.max(0, kids - 1) * 240) : 0;
+
+    // ── Sozialversicherung ──
+    const sv = calcSV(annual, kids);
+    const taxBase = annual - sv;
+
+    // ── Basis-zvE (wie Lohnsteuertabelle – nur Pauschbeträge) ──
+    const zvE_std = Math.max(0, taxBase - pausch - soPausch - entlastung - behinderPausch);
+
+    // ── Gesamt-Werbungskosten aus der Steuererklärung ──
+    const totalWK    = pendlerWK + hoDeduction + extraWK;
+    const wkFinal    = Math.max(pausch, totalWK);
+    const extraAbove = Math.max(0, wkFinal - pausch);
+
+    // ── zvE mit allen Abzügen ──
+    const zvE_actual = Math.max(0, taxBase - wkFinal - soPausch - entlastung - behinderPausch - spendenAbzug);
+
+    // ── Steuer: Standard vs. optimiert ──
+    const useSplitting = (tc === 3) || verheiratet;
+
+    let t_std_total, t_actual_total, soli_std_total, soli_actual_total,
+        k_std_total, k_actual_total;
+
+    if (verheiratet) {
+      // Partner-Daten
+      const partnerGross = parseFloat(document.getElementById('partnerGross').value) || 0;
+      const partnerAnnual = partnerGross * 12;
+      const partnerSV = calcSV(partnerAnnual, 0);
+      const partnerTaxBase = partnerAnnual - partnerSV;
+      const partnerZvE_std = Math.max(0, partnerTaxBase - pausch - soPausch);
+      const partnerZvE_actual = Math.max(0, partnerTaxBase - Math.max(pausch, 0) - soPausch);
+
+      // Lohnsteuern einzeln gezahlt (Ist-Abzug)
+      const t1_paid = incomeTax(zvE_std);
+      const t2_paid = incomeTax(partnerZvE_std);
+      const t_paid_total = t1_paid + t2_paid;
+
+      // Splitting-Steuer (Soll)
+      const zvE_combined_actual = zvE_actual + partnerZvE_actual;
+      const t_splitting = incomeTaxSplitting(zvE_combined_actual);
+
+      t_std_total    = t_paid_total;
+      t_actual_total = t_splitting;
+
+      const soli_paid = solidaritaet(t1_paid) + solidaritaet(t2_paid);
+      const soli_split = solidaritaet(t_splitting);
+      soli_std_total    = soli_paid;
+      soli_actual_total = soli_split;
+
+      k_std_total    = Math.round(t_paid_total  * kirchRate);
+      k_actual_total = Math.round(t_splitting   * kirchRate);
+
+      // ── Progressionsvorbehalt (Splitting) ──
+      if (lelTotal > 0 && zvE_combined_actual > 0) {
+        const zvE_prog = zvE_combined_actual + lelTotal;
+        const effRate  = incomeTaxSplitting(zvE_prog) / zvE_prog;
+        t_actual_total    = Math.round(effRate * zvE_combined_actual);
+        soli_actual_total = solidaritaet(t_actual_total);
+        k_actual_total    = Math.round(t_actual_total * kirchRate);
+      }
+    } else {
+      const taxFn = (tc === 3) ? incomeTaxSplitting : incomeTax;
+      t_std_total    = taxFn(zvE_std);
+      t_actual_total = taxFn(zvE_actual);
+      soli_std_total    = solidaritaet(t_std_total);
+      soli_actual_total = solidaritaet(t_actual_total);
+      k_std_total    = Math.round(t_std_total    * kirchRate);
+      k_actual_total = Math.round(t_actual_total * kirchRate);
+
+      // ── Progressionsvorbehalt (Einzelveranlagung) ──
+      if (lelTotal > 0 && zvE_actual > 0) {
+        const zvE_prog = zvE_actual + lelTotal;
+        const effRate  = taxFn(zvE_prog) / zvE_prog;
+        t_actual_total    = Math.round(effRate * zvE_actual);
+        soli_actual_total = solidaritaet(t_actual_total);
+        k_actual_total    = Math.round(t_actual_total * kirchRate);
+      }
+    }
+
+    const refundWK = Math.max(0,
+      (t_std_total - t_actual_total)
+      + (soli_std_total - soli_actual_total)
+      + (k_std_total - k_actual_total)
+    );
+
+    // ── Kinderfreibetrag vs. Kindergeld ──
+    let kinderBonus = 0;
+    if (kids > 0 && tc !== 5 && tc !== 6) {
+      const kindergeld  = kids * 259 * 12;
+      const kFreibetrag = kids * 9756;
+      const mr = marginalRate(zvE_actual, useSplitting);
+      const taxSaving = kFreibetrag * mr * (1 + kirchRate);
+      if (taxSaving > kindergeld) {
+        kinderBonus = Math.round(taxSaving - kindergeld);
+      }
+    }
+
+    // ── Behinderung Steuerersparnis ──
+    let behinderSaving = 0;
+    if (hatBehinderung && behinderPausch > 0) {
+      const mr = marginalRate(zvE_actual, useSplitting);
+      behinderSaving = Math.round(behinderPausch * mr * (1 + kirchRate));
+    }
+
+    const totalRefund = Math.max(0, refundWK + kinderBonus + handwerkerKredit);
+
+    displayResult(totalRefund, {
+      wk: refundWK, kinder: kinderBonus,
+      hoDeduction, extraAbove, kids, tc,
+      hoDays, extraWK,
+      pendlerWK, commuteKm, workDays,
+      behinderPausch, behinderSaving, gdB,
+      verheiratet,
+      spenden, spendenAbzug,
+      handwerker, handwerkerKredit,
+      lelTotal,
+      marginal: Math.round(marginalRate(zvE_actual, useSplitting) * 100)
+    });
+  }
+
+  // ── Counter Animation ──
+  function animateNumber(el, target, duration = 900) {
+    const start = performance.now();
+    function step(now) {
+      const p   = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(ease * target).toLocaleString('de-DE') + ' €';
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function displayResult(total, meta) {
+    animateNumber(document.getElementById('result-number'), total);
+
+    let rows = '';
+
+    if (meta.pendlerWK > 0) {
+      const pSave = Math.round(meta.pendlerWK * (meta.marginal / 100));
+      rows += row(
+        'Pendlerpauschale',
+        `${meta.commuteKm} km × ${meta.workDays} Tage = ${meta.pendlerWK.toLocaleString('de-DE')} € Werbungskosten`,
+        pSave > 0 ? `~${pSave.toLocaleString('de-DE')} €` : '—',
+        pSave === 0
+      );
+    }
+
+    if (meta.hoDays > 0) {
+      const hoSave = Math.round(Math.min(meta.hoDays * 6, 1260) * (meta.marginal / 100));
+      rows += row(
+        'Homeoffice-Pauschale',
+        `${meta.hoDays} Tage × 6 € = ${Math.min(meta.hoDays * 6, 1260).toLocaleString('de-DE')} € Abzug`,
+        hoSave > 0 ? `~${hoSave.toLocaleString('de-DE')} €` : '—',
+        hoSave === 0
+      );
+    }
+
+    if (meta.extraWK > 0) {
+      const wkSave = Math.round(meta.extraAbove * (meta.marginal / 100));
+      rows += row(
+        'Zusätzliche Werbungskosten',
+        `Über Pauschbetrag hinaus: ${meta.extraAbove.toLocaleString('de-DE')} €`,
+        wkSave > 0 ? `~${wkSave.toLocaleString('de-DE')} €` : '—',
+        wkSave === 0
+      );
+    }
+
+    if (meta.behinderPausch > 0) {
+      rows += row(
+        `Behinderten-Pauschbetrag (GdB ${meta.gdB})`,
+        `${meta.behinderPausch.toLocaleString('de-DE')} € steuerlicher Abzug`,
+        meta.behinderSaving > 0 ? `~${meta.behinderSaving.toLocaleString('de-DE')} €` : '—',
+        meta.behinderSaving === 0
+      );
+    }
+
+    if (meta.kinder > 0) {
+      rows += row(
+        'Kinderfreibetrag-Vorteil',
+        `${meta.kids} ${meta.kids === 1 ? 'Kind' : 'Kinder'} · Freibetrag günstiger als Kindergeld`,
+        `~${meta.kinder.toLocaleString('de-DE')} €`,
+        false
+      );
+    }
+
+    if (meta.verheiratet) {
+      rows += row(
+        'Ehegattensplitting',
+        'Gemeinsame Veranlagung – kombiniertes zvE geteilt',
+        'eingerechnet',
+        true
+      );
+    }
+
+    if (meta.tc === 2) {
+      rows += row(
+        'Entlastungsbetrag Alleinerziehend',
+        'Bereits im Lohnsteuerabzug berücksichtigt (falls registriert)',
+        'inkl.',
+        true
+      );
+    }
+
+    if (meta.spendenAbzug > 0) {
+      const spendenSave = Math.round(meta.spendenAbzug * (meta.marginal / 100));
+      rows += row(
+        'Spenden',
+        `${meta.spendenAbzug.toLocaleString('de-DE')} € als Sonderausgaben absetzbar`,
+        spendenSave > 0 ? `~${spendenSave.toLocaleString('de-DE')} €` : '—',
+        spendenSave === 0
+      );
+    }
+
+    if (meta.handwerkerKredit > 0) {
+      rows += row(
+        'Handwerkerleistungen',
+        `20% von ${meta.handwerker.toLocaleString('de-DE')} € Lohnkosten`,
+        `~${meta.handwerkerKredit.toLocaleString('de-DE')} €`,
+        false
+      );
+    }
+
+    if (meta.lelTotal > 0) {
+      rows += row(
+        'Progressionsvorbehalt (§ 32b EStG)',
+        `${meta.lelTotal.toLocaleString('de-DE')} € Lohnersatzleistungen – erhöhen Steuersatz auf übriges Einkommen`,
+        'eingerechnet',
+        true
+      );
+    }
+
+    rows += row(
+      'Weitere mögliche Abzüge',
+      'Arztkosten, Fortbildung, Umzug, …',
+      'noch nicht eingerechnet',
+      true
+    );
+
+    document.getElementById('breakdown').innerHTML =
+      `<div class="breakdown-title">Aufschlüsselung</div>${rows}`;
+
+    // Highlight
+    let msg = '';
+    if (meta.behinderPausch >= 1440) {
+      msg = `<strong>Behinderten-Pauschbetrag:</strong> Mit GdB ${meta.gdB} hast Du Anspruch auf ${meta.behinderPausch.toLocaleString('de-DE')} € Pauschbetrag – das wird im Lohnsteuerabzug oft nicht vollständig berücksichtigt. Eine Steuererklärung holt die Differenz zurück.`;
+    } else if (meta.verheiratet) {
+      msg = `<strong>Ehegattensplitting:</strong> Durch die gemeinsame Veranlagung werden Eure Einkommen zusammengefasst und gleichmäßig aufgeteilt – das senkt den Steuersatz. Der größte Vorteil entsteht bei unterschiedlichen Einkommen.`;
+    } else if (meta.pendlerWK > 0 && meta.pendlerWK > meta.hoDeduction) {
+      msg = `<strong>Dein größter Hebel:</strong> Die Pendlerpauschale bringt Dir bei ${meta.commuteKm} km Entfernung und ${meta.workDays} Arbeitstagen ${meta.pendlerWK.toLocaleString('de-DE')} € an Werbungskosten – automatisch, ohne Einzelnachweise.`;
+    } else if (meta.hoDays >= 100) {
+      msg = `<strong>Homeoffice zahlt sich aus:</strong> Bei ${meta.hoDays} Homeoffice-Tagen setzt Du ${Math.min(meta.hoDays * 6, 1260).toLocaleString('de-DE')} € ab – komplett ohne Belege und ohne separates Arbeitszimmer.`;
+    } else if (meta.kids > 0 && meta.kinder > 0) {
+      msg = `<strong>Kinderfreibetrag statt Kindergeld:</strong> Bei Deinem Einkommen ist der Kinderfreibetrag steuerlich vorteilhafter. Das Finanzamt erstattet Dir die Differenz – aber nur bei eingereichter Steuererklärung.`;
+    } else {
+      msg = `<strong>Auch ohne besondere Abzüge lohnt es sich:</strong> Im Schnitt erstattet das Finanzamt deutschen Arbeitnehmerinnen und Arbeitnehmern über 1.000 € – oft aus Posten, die man selbst nicht auf dem Schirm hat.`;
+    }
+    document.getElementById('highlight-box').innerHTML = msg;
+
+    // Ergebnis-Text für E-Mail merken
+    _lastResultText = `Mein geschätztes Steuererstattungs-Ergebnis 2026: ${total.toLocaleString('de-DE')} €\n\nBerechnet mit dem Steuerrechner von Mein Aktiver Lohi.\nFür eine kostenlose Beratung: https://www.mein-aktiver-lohi.de`;
+
+    const card = document.getElementById('result-card');
+    card.style.display = 'block';
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── E-Mail Ergebnis senden ──
+  let _lastResultText = '';
+
+  function sendResultByEmail() {
+    const email = document.getElementById('emailAddress').value.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      alert('Bitte gib eine gültige E-Mail-Adresse ein.');
+      return;
+    }
+    const subject = encodeURIComponent('Steuerrechner Ergebnis');
+    const body    = encodeURIComponent(_lastResultText);
+    window.location.href = `mailto:info@mein-aktiver-lohi.de?to=${encodeURIComponent(email)}&subject=${subject}&body=${body}`;
+  }
+
+  function row(label, sub, amount, neutral) {
+    return `
+      <div class="breakdown-item">
+        <div class="item-label">
+          ${label}
+          <small>${sub}</small>
+        </div>
+        <div class="item-amount${neutral ? ' neutral' : ''}">${amount}</div>
+      </div>`;
+  }
+</script>
+</body>
+</html>
